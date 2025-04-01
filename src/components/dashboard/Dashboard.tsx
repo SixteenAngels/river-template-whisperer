@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
       </div>
       
       {/* Water quality metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <WaterQualityCard 
           title="pH Level" 
           value={7.2} 
@@ -50,6 +50,22 @@ const Dashboard: React.FC = () => {
           change={2.1} 
           status="positive" 
           type="flow" 
+        />
+        <WaterQualityCard 
+          title="Lead Level" 
+          value={0.012} 
+          unit="mg/L" 
+          change={0.5} 
+          status="negative" 
+          type="lead" 
+        />
+        <WaterQualityCard 
+          title="Mercury Cyanide" 
+          value={0.003} 
+          unit="mg/L" 
+          change={-0.2} 
+          status="positive" 
+          type="mercury" 
         />
       </div>
       
