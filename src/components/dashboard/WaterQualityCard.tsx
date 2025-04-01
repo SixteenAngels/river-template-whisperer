@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowDown, ArrowUp, Droplets, ThermometerIcon, Activity, Timer, TestTube, Flask } from 'lucide-react';
+import { ArrowDown, ArrowUp, Droplets, ThermometerIcon, Activity, Timer, TestTube, FlaskRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WaterQualityCardProps {
@@ -27,7 +27,7 @@ const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
       case 'temperature': return <ThermometerIcon className="h-5 w-5" />;
       case 'flow': return <Timer className="h-5 w-5" />;
       case 'lead': return <TestTube className="h-5 w-5" />;
-      case 'mercury': return <Flask className="h-5 w-5" />;
+      case 'mercury': return <FlaskRound className="h-5 w-5" />;
       default: return <Droplets className="h-5 w-5" />;
     }
   };

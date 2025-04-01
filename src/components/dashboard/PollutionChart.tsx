@@ -49,16 +49,19 @@ const PollutionChart: React.FC = () => {
               }}
               labelStyle={{ color: '#E6F1FF' }}
               formatter={(value, name) => {
-                if (name === 'lead' || name === 'mercury') {
-                  return [value.toFixed(3) + ' mg/L', name.charAt(0).toUpperCase() + name.slice(1)];
+                if (typeof value === 'number') {
+                  if (name === 'lead' || name === 'mercury') {
+                    return [`${value.toFixed(3)} mg/L`, String(name).charAt(0).toUpperCase() + String(name).slice(1)];
+                  }
+                  return [`${value} μg/L`, String(name).charAt(0).toUpperCase() + String(name).slice(1)];
                 }
-                return [value + ' μg/L', name.charAt(0).toUpperCase() + name.slice(1)];
+                return [value, String(name)];
               }}
             />
             <Legend 
               verticalAlign="bottom" 
               wrapperStyle={{ paddingTop: 10 }} 
-              formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
+              formatter={(value) => String(value).charAt(0).toUpperCase() + String(value).slice(1)}
             />
             <Bar dataKey="nitrates" fill="#33C3F0" radius={[4, 4, 0, 0]} />
             <Bar dataKey="phosphates" fill="#7E69AB" radius={[4, 4, 0, 0]} />
