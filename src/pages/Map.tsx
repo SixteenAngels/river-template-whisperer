@@ -2,7 +2,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InfoCircle, MapPin, Navigation } from 'lucide-react';
+import { Info, MapPin, Navigation } from 'lucide-react';
 import RiverMapView from '@/components/maps/RiverMapView';
 
 const Map = () => {
@@ -31,7 +31,7 @@ const Map = () => {
             <Card className="river-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <InfoCircle className="h-4 w-4 text-river-blue-light" />
+                  <Info className="h-4 w-4 text-river-blue-light" />
                   Map Legend
                 </CardTitle>
               </CardHeader>
