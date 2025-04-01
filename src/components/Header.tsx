@@ -1,10 +1,13 @@
 
 import React from 'react';
 import { Droplets, BarChart3, Map, AlertCircle, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Header: React.FC = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between bg-background/80 px-4 backdrop-blur-sm lg:px-8">
       <div className="flex items-center gap-2">
@@ -13,19 +16,19 @@ const Header: React.FC = () => {
       </div>
       
       <nav className="hidden md:flex items-center space-x-1">
-        <NavLink to="/" active={true}>
+        <NavLink to="/" active={currentPath === '/'}>
           <BarChart3 className="h-4 w-4 mr-2" />
           Dashboard
         </NavLink>
-        <NavLink to="/map">
+        <NavLink to="/map" active={currentPath === '/map'}>
           <Map className="h-4 w-4 mr-2" />
           Map View
         </NavLink>
-        <NavLink to="/alerts">
+        <NavLink to="/alerts" active={currentPath === '/alerts'}>
           <AlertCircle className="h-4 w-4 mr-2" />
           Alerts
         </NavLink>
-        <NavLink to="/settings">
+        <NavLink to="/settings" active={currentPath === '/settings'}>
           <Settings className="h-4 w-4 mr-2" />
           Settings
         </NavLink>
