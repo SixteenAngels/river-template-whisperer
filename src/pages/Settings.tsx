@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Globe, Lock, User, Shield, Droplets, Zap } from 'lucide-react';
+import { Bell, Globe, Lock, User, Shield, Droplets, Zap, Wifi } from 'lucide-react';
 import AccountSettings from '@/components/settings/AccountSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import DisplaySettings from '@/components/settings/DisplaySettings';
 import DataSettings from '@/components/settings/DataSettings';
 import PrivacySettings from '@/components/settings/PrivacySettings';
+import MqttSettings from '@/components/settings/MqttSettings';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('account');
@@ -29,7 +30,7 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="account" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-8">
+                <TabsList className="grid grid-cols-2 md:grid-cols-6 mb-8">
                   <TabsTrigger value="account" className="flex items-center gap-2">
                     <User className="h-4 w-4" />
                     <span className="hidden sm:inline">Account</span>
@@ -49,6 +50,10 @@ const Settings = () => {
                   <TabsTrigger value="privacy" className="flex items-center gap-2">
                     <Shield className="h-4 w-4" />
                     <span className="hidden sm:inline">Privacy</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="mqtt" className="flex items-center gap-2">
+                    <Wifi className="h-4 w-4" />
+                    <span className="hidden sm:inline">MQTT</span>
                   </TabsTrigger>
                 </TabsList>
                 
@@ -70,6 +75,10 @@ const Settings = () => {
                 
                 <TabsContent value="privacy">
                   <PrivacySettings />
+                </TabsContent>
+                
+                <TabsContent value="mqtt">
+                  <MqttSettings />
                 </TabsContent>
               </Tabs>
             </CardContent>

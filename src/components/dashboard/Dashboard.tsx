@@ -1,12 +1,26 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import WaterQualityCard from './WaterQualityCard';
 import WaterLevelChart from './WaterLevelChart';
 import PollutionChart from './PollutionChart';
 import StationsMap from './StationsMap';
 import WaterFlowGauge from './WaterFlowGauge';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Dashboard: React.FC = () => {
+  const [selectedDevice, setSelectedDevice] = useState('device-1');
+  
+  // Mock device data - in a real app this would come from your MQTT connection
+  const devices = [
+    { id: 'device-1', name: 'Sensor 1' },
+    { id: 'device-2', name: 'Sensor 2' },
+    { id: 'device-3', name: 'Sensor 3' },
+    { id: 'device-4', name: 'Sensor 4' },
+    { id: 'device-5', name: 'Sensor 5' },
+  ];
+
   return (
     <div className="container mx-auto p-4 space-y-8">
       <div className="flex justify-between items-center">
@@ -14,6 +28,31 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center space-x-2">
           <span className="text-sm">Last updated: </span>
           <span className="text-sm text-river-blue-light">May 15, 2023 14:30</span>
+        </div>
+      </div>
+      
+      {/* Device selector */}
+      <div className="w-full bg-background/60 p-4 rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-medium">Device Selection</h2>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="w-[200px] text-xs">Select a device from the swarm to view its data</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          
+          <ToggleGroup type="single" value={selectedDevice} onValueChange={(value) => value && setSelectedDevice(value)}>
+            {devices.map((device) => (
+              <ToggleGroupItem key={device.id} value={device.id} aria-label={device.name}>
+                {device.name}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
       </div>
       
