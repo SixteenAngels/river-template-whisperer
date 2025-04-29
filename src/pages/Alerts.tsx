@@ -9,8 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Mock data for alerts
-const alerts = [
+// Type for alert objects
+type Alert = {
+  id: number;
+  title: string;
+  type: 'info' | 'warning' | 'critical';
+  station: string;
+  timestamp: string;
+  description: string;
+  acknowledged: boolean;
+};
+
+// Mock data for alerts - ensuring each alert has the correct type that matches Alert type definition
+const alerts: Alert[] = [
   {
     id: 1,
     title: 'High Turbidity Detected',
@@ -58,17 +69,6 @@ const alerts = [
   }
 ];
 
-// Type for alert objects
-type Alert = {
-  id: number;
-  title: string;
-  type: 'info' | 'warning' | 'critical';
-  station: string;
-  timestamp: string;
-  description: string;
-  acknowledged: boolean;
-};
-
 const Alerts: React.FC = () => {
   const [alertsList, setAlertsList] = useState<Alert[]>(alerts);
   const [activeTab, setActiveTab] = useState<string>('all');
@@ -85,7 +85,7 @@ const Alerts: React.FC = () => {
   };
 
   // Get alert type badge
-  const getAlertBadge = (type: string) => {
+  const getAlertBadge = (type: 'info' | 'warning' | 'critical') => {
     switch (type) {
       case 'info':
         return <Badge className="bg-river-blue-light hover:bg-river-blue-light">Info</Badge>;
@@ -99,7 +99,7 @@ const Alerts: React.FC = () => {
   };
 
   // Get alert icon
-  const getAlertIcon = (type: string) => {
+  const getAlertIcon = (type: 'info' | 'warning' | 'critical') => {
     switch (type) {
       case 'info':
         return <Info className="h-5 w-5 text-river-blue-light" />;
