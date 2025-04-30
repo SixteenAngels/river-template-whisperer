@@ -6,20 +6,104 @@ import PollutionChart from './PollutionChart';
 import StationsMap from './StationsMap';
 import WaterFlowGauge from './WaterFlowGauge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Info } from 'lucide-react';
+import { Info, Cpu } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import DeviceDetailsDrawer from '@/components/devices/DeviceDetailsDrawer';
 
 const Dashboard: React.FC = () => {
   const [selectedDevice, setSelectedDevice] = useState('device-1');
+  const [showDeviceDetails, setShowDeviceDetails] = useState(false);
   
   // Mock device data - in a real app this would come from your MQTT connection
   const devices = [
-    { id: 'device-1', name: 'Sensor 1' },
-    { id: 'device-2', name: 'Sensor 2' },
-    { id: 'device-3', name: 'Sensor 3' },
-    { id: 'device-4', name: 'Sensor 4' },
-    { id: 'device-5', name: 'Sensor 5' },
+    { 
+      id: 'device-1', 
+      name: 'Sensor 1',
+      type: 'standard' as const, 
+      location: 'North River',
+      status: 'online' as const,
+      batteryLevel: 85,
+      signalStrength: 92,
+      active: true,
+      lastSeen: '2025-04-29T14:30:00',
+      firmwareVersion: '1.2.3',
+      serialNumber: 'RW-1001-STD',
+      coordinates: {
+        latitude: 40.7128,
+        longitude: -74.0060,
+      }
+    },
+    { 
+      id: 'device-2', 
+      name: 'Sensor 2',
+      type: 'pro' as const, 
+      location: 'South Bridge',
+      status: 'online' as const,
+      batteryLevel: 92,
+      signalStrength: 78,
+      active: true,
+      lastSeen: '2025-04-29T14:25:00',
+      firmwareVersion: '2.0.1',
+      serialNumber: 'RW-2045-PRO',
+      coordinates: {
+        latitude: 40.7129,
+        longitude: -74.0061,
+      }
+    },
+    { 
+      id: 'device-3', 
+      name: 'Sensor 3',
+      type: 'mini' as const, 
+      location: 'East Tributary',
+      status: 'offline' as const,
+      batteryLevel: 15,
+      signalStrength: 30,
+      active: false,
+      lastSeen: '2025-04-28T09:15:00',
+      firmwareVersion: '1.1.0',
+      serialNumber: 'RW-3022-MIN',
+      coordinates: {
+        latitude: 40.7130,
+        longitude: -74.0062,
+      }
+    },
+    { 
+      id: 'device-4', 
+      name: 'Sensor 4',
+      type: 'standard' as const, 
+      location: 'West Bank',
+      status: 'maintenance' as const,
+      batteryLevel: 45,
+      signalStrength: 60,
+      active: false,
+      lastSeen: '2025-04-27T16:45:00',
+      firmwareVersion: '1.2.2',
+      serialNumber: 'RW-1056-STD',
+      coordinates: {
+        latitude: 40.7131,
+        longitude: -74.0063,
+      }
+    },
+    { 
+      id: 'device-5', 
+      name: 'Sensor 5',
+      type: 'pro' as const,
+      location: 'City Center', 
+      status: 'online' as const,
+      batteryLevel: 78,
+      signalStrength: 85,
+      active: true,
+      lastSeen: '2025-04-29T14:10:00',
+      firmwareVersion: '2.0.1',
+      serialNumber: 'RW-2078-PRO',
+      coordinates: {
+        latitude: 40.7132,
+        longitude: -74.0064,
+      }
+    }
   ];
+
+  const selectedDeviceData = devices.find(device => device.id === selectedDevice) || devices[0];
 
   return (
     <div className="container mx-auto p-4 space-y-8">
@@ -27,7 +111,7 @@ const Dashboard: React.FC = () => {
         <h1 className="text-2xl font-bold">River Dashboard</h1>
         <div className="flex items-center space-x-2">
           <span className="text-sm">Last updated: </span>
-          <span className="text-sm text-river-blue-light">May 15, 2023 14:30</span>
+          <span className="text-sm text-river-blue-light">April 30, 2025 14:30</span>
         </div>
       </div>
       
@@ -46,13 +130,38 @@ const Dashboard: React.FC = () => {
             </Tooltip>
           </div>
           
-          <ToggleGroup type="single" value={selectedDevice} onValueChange={(value) => value && setSelectedDevice(value)}>
-            {devices.map((device) => (
-              <ToggleGroupItem key={device.id} value={device.id} aria-label={device.name}>
-                {device.name}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          <div className="flex items-center gap-2">
+            <ToggleGroup type="single" value={selectedDevice} onValueChange={(value) => value && setSelectedDevice(value)}>
+              {devices.map((device) => (
+                <ToggleGroupItem 
+                  key={device.id} 
+                  value={device.id} 
+                  aria-label={device.name}
+                  className={device.status === 'offline' ? 'opacity-50' : ''}
+                  disabled={device.status === 'offline'}
+                >
+                  {device.name}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            
+            <button 
+              onClick={() => setShowDeviceDetails(true)}
+              className="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Cpu className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="mt-2 flex items-center gap-2 text-xs">
+          <span className={`inline-flex h-2 w-2 rounded-full ${
+            selectedDeviceData.status === 'online' ? 'bg-green-500' :
+            selectedDeviceData.status === 'maintenance' ? 'bg-amber-500' : 'bg-red-500'
+          }`}></span>
+          <span className="capitalize text-muted-foreground">{selectedDeviceData.status}</span>
+          <span className="text-muted-foreground">|</span>
+          <span className="text-muted-foreground">{selectedDeviceData.location}</span>
         </div>
       </div>
       
@@ -121,6 +230,13 @@ const Dashboard: React.FC = () => {
         <PollutionChart />
         <StationsMap />
       </div>
+      
+      {/* Device details drawer */}
+      <DeviceDetailsDrawer 
+        open={showDeviceDetails} 
+        onClose={() => setShowDeviceDetails(false)}
+        device={selectedDeviceData}
+      />
     </div>
   );
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Globe, Lock, User, Shield, Droplets, Zap, Wifi, Cpu } from 'lucide-react';
+import { Bell, Globe, Shield, Droplets, Zap, Wifi, Cpu } from 'lucide-react';
 import AccountSettings from '@/components/settings/AccountSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import DisplaySettings from '@/components/settings/DisplaySettings';
@@ -11,6 +11,8 @@ import DataSettings from '@/components/settings/DataSettings';
 import PrivacySettings from '@/components/settings/PrivacySettings';
 import MqttSettings from '@/components/settings/MqttSettings';
 import DevicesSettings from '@/components/settings/DevicesSettings';
+import { AlertBanner } from '@/components/alerts/AlertBanner';
+import { alertsData } from '@/types/alerts';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('account');
@@ -21,6 +23,9 @@ const Settings = () => {
       <main className="flex-1 p-4 md:p-6">
         <div className="mx-auto max-w-5xl">
           <h1 className="mb-6 text-2xl font-bold text-river-foreground">Settings</h1>
+          
+          {/* Show alert banner if there are critical alerts */}
+          <AlertBanner alerts={alertsData} />
           
           <Card className="river-card">
             <CardHeader className="pb-4">
@@ -33,7 +38,7 @@ const Settings = () => {
               <Tabs defaultValue="account" value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid grid-cols-2 md:grid-cols-7 mb-8">
                   <TabsTrigger value="account" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                    <Zap className="h-4 w-4" />
                     <span className="hidden sm:inline">Account</span>
                   </TabsTrigger>
                   <TabsTrigger value="notifications" className="flex items-center gap-2">
