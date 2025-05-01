@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,9 +13,27 @@ import MqttSettings from '@/components/settings/MqttSettings';
 import DevicesSettings from '@/components/settings/DevicesSettings';
 import AlertBanner from '@/components/alerts/AlertBanner';
 import { alertsData } from '@/types/alerts';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Settings = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account');
+  
+  // Parse tab from URL if available
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    if (tabParam && ['account', 'notifications', 'display', 'data', 'privacy', 'devices', 'mqtt'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
+  
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/settings?tab=${value}`, { replace: true });
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-river">
@@ -35,8 +53,13 @@ const Settings = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="account" value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid grid-cols-2 md:grid-cols-7 mb-8">
+              <Tabs 
+                defaultValue="account" 
+                value={activeTab} 
+                onValueChange={handleTabChange} 
+                className="w-full"
+              >
+                <TabsList className="grid grid-cols-2 md:grid-cols-7 mb-8 overflow-x-auto">
                   <TabsTrigger value="account" className="flex items-center gap-2">
                     <Zap className="h-4 w-4" />
                     <span className="hidden sm:inline">Account</span>
