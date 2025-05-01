@@ -11,7 +11,7 @@ import DataSettings from '@/components/settings/DataSettings';
 import PrivacySettings from '@/components/settings/PrivacySettings';
 import MqttSettings from '@/components/settings/MqttSettings';
 import DevicesSettings from '@/components/settings/DevicesSettings';
-import { AlertBanner } from '@/components/alerts/AlertBanner';
+import AlertBanner from '@/components/alerts/AlertBanner';
 import { alertsData } from '@/types/alerts';
 
 const Settings = () => {
