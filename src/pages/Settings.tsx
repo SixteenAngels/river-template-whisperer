@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bell, Globe, Shield, Droplets, Zap, Wifi, Cpu } from 'lucide-react';
+import { Bell, Globe, Shield, Droplets, Zap, Wifi, Cpu, Download } from 'lucide-react';
 import AccountSettings from '@/components/settings/AccountSettings';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import DisplaySettings from '@/components/settings/DisplaySettings';
@@ -11,6 +11,7 @@ import DataSettings from '@/components/settings/DataSettings';
 import PrivacySettings from '@/components/settings/PrivacySettings';
 import MqttSettings from '@/components/settings/MqttSettings';
 import DevicesSettings from '@/components/settings/DevicesSettings';
+import ExportSettings from '@/components/settings/ExportSettings';
 import AlertBanner from '@/components/alerts/AlertBanner';
 import { alertsData } from '@/types/alerts';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -24,7 +25,7 @@ const Settings = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam && ['account', 'notifications', 'display', 'data', 'privacy', 'devices', 'mqtt'].includes(tabParam)) {
+    if (tabParam && ['account', 'notifications', 'display', 'data', 'privacy', 'devices', 'mqtt', 'export'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location]);
@@ -59,7 +60,7 @@ const Settings = () => {
                 onValueChange={handleTabChange} 
                 className="w-full"
               >
-                <TabsList className="grid grid-cols-2 md:grid-cols-7 mb-8 overflow-x-auto">
+                <TabsList className="grid grid-cols-2 md:grid-cols-8 mb-8 overflow-x-auto">
                   <TabsTrigger value="account" className="flex items-center gap-2">
                     <Zap className="h-4 w-4" />
                     <span className="hidden sm:inline">Account</span>
@@ -87,6 +88,10 @@ const Settings = () => {
                   <TabsTrigger value="mqtt" className="flex items-center gap-2">
                     <Wifi className="h-4 w-4" />
                     <span className="hidden sm:inline">MQTT</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="export" className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Export</span>
                   </TabsTrigger>
                 </TabsList>
                 
@@ -116,6 +121,10 @@ const Settings = () => {
                 
                 <TabsContent value="mqtt">
                   <MqttSettings />
+                </TabsContent>
+                
+                <TabsContent value="export">
+                  <ExportSettings />
                 </TabsContent>
               </Tabs>
             </CardContent>

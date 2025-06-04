@@ -11,17 +11,21 @@ import { defaultDataSettings, DataSettingsValues } from './data/DataSettingsSche
 import CollectionSettings from './data/CollectionSettings';
 import ParametersSettings from './data/ParametersSettings';
 import AdvancedFilteringSettings from './data/AdvancedFilteringSettings';
+import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 
 const DataSettings = () => {
   const form = useForm<DataSettingsValues>({
     defaultValues: defaultDataSettings
   });
 
+  const { saveSettings } = useSettingsPersistence(form, 'data-settings');
+
   const onSubmit = (data: DataSettingsValues) => {
     console.log('Data settings updated:', data);
+    saveSettings(data);
     toast({
       title: "Settings saved",
-      description: "Your data collection and display settings have been updated."
+      description: "Your data collection and display settings have been updated and saved."
     });
   };
 

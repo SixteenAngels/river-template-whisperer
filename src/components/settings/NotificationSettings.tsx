@@ -7,17 +7,21 @@ import { toast } from '@/hooks/use-toast';
 import NotificationChannels from './notifications/NotificationChannels';
 import AlertTypes from './notifications/AlertTypes';
 import { defaultNotificationSettings, NotificationSettingsFormValues } from './notifications/NotificationSettingsSchema';
+import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
 
 const NotificationSettings = () => {
   const form = useForm<NotificationSettingsFormValues>({
     defaultValues: defaultNotificationSettings
   });
 
+  const { saveSettings } = useSettingsPersistence(form, 'notification-settings');
+
   const onSubmit = (data: NotificationSettingsFormValues) => {
     console.log('Notification settings updated:', data);
+    saveSettings(data);
     toast({
       title: "Settings saved",
-      description: "Your notification preferences have been updated."
+      description: "Your notification preferences have been updated and saved."
     });
   };
 
