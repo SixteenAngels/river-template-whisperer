@@ -3,11 +3,11 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Activity, Wifi, WifiOff } from 'lucide-react';
-import { useRealTimeData } from '@/hooks/useRealTimeData';
+import { useDjangoWebSocket } from '@/hooks/useDjangoWebSocket';
 
 const RealTimeDataWidget = () => {
-  const { data, isConnected } = useRealTimeData(true);
-  const latestData = data[data.length - 1];
+  const { isConnected, sensorData } = useDjangoWebSocket();
+  const latestData = sensorData[sensorData.length - 1];
 
   return (
     <Card className="river-card">
@@ -23,7 +23,7 @@ const RealTimeDataWidget = () => {
           </Badge>
         </div>
         <CardDescription>
-          Live water quality data from monitoring stations
+          Live water quality data from Django backend
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -55,16 +55,19 @@ const RealTimeDataWidget = () => {
             </div>
           </div>
         ) : (
-          <p className="text-muted-foreground">No real-time data available</p>
+          <p className="text-muted-foreground">Waiting for data from Django backend...</p>
         )}
         
-        {data.length > 0 && (
+        {sensorData.length > 0 && (
           <div className="mt-4 pt-4 border-t">
             <p className="text-xs text-muted-foreground">
               Last updated: {new Date(latestData?.timestamp || '').toLocaleTimeString()}
             </p>
             <p className="text-xs text-muted-foreground">
-              Data points received: {data.length}
+              Data points received: {sensorData.length}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Station: {latestData?.stationId}
             </p>
           </div>
         )}
