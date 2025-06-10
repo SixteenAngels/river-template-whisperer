@@ -28,7 +28,7 @@ const App = () => {
 
   // WebSocket configuration - update this URL to match your Django backend
   const wsConfig = {
-    url: process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws/sensors/',
+    url: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
     protocols: [],
     reconnectAttempts: 5,
     reconnectInterval: 3000
