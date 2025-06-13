@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { AlertCircle, Layers, Navigation, Zap } from 'lucide-react';
@@ -7,11 +6,11 @@ import MapInfoWindow from './MapInfoWindow';
 import MarkerIcon from './MarkerIcon';
 import { riverPathCoordinates } from './RiverPath';
 
-// Enhanced monitoring stations with real data structure
+// Enhanced monitoring stations with custom descriptive names
 const stations = [
   { 
     id: 1, 
-    name: 'Station Alpha', 
+    name: 'Brooklyn Bridge Water Monitor', 
     position: { lat: 40.712776, lng: -74.005974 }, 
     status: 'normal' as const,
     data: {
@@ -24,7 +23,7 @@ const stations = [
   },
   { 
     id: 2, 
-    name: 'Station Beta', 
+    name: 'Manhattan Financial District Sensor', 
     position: { lat: 40.730610, lng: -73.985242 }, 
     status: 'normal' as const,
     data: {
@@ -37,7 +36,7 @@ const stations = [
   },
   { 
     id: 3, 
-    name: 'Station Gamma', 
+    name: 'Central Park South Quality Station', 
     position: { lat: 40.758896, lng: -73.985130 }, 
     status: 'warning' as const,
     data: {
@@ -50,7 +49,7 @@ const stations = [
   },
   { 
     id: 4, 
-    name: 'Station Delta', 
+    name: 'Times Square Environmental Monitor', 
     position: { lat: 40.748817, lng: -73.985428 }, 
     status: 'normal' as const,
     data: {
@@ -63,7 +62,7 @@ const stations = [
   },
   { 
     id: 5, 
-    name: 'Station Epsilon', 
+    name: 'Hudson River Industrial Sensor', 
     position: { lat: 40.712811, lng: -74.013083 }, 
     status: 'danger' as const,
     data: {
@@ -186,10 +185,11 @@ const MockGoogleMap = () => {
           <AlertCircle className="h-10 w-10 text-river-purple-light mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">Enhanced Map Features</h3>
           <p className="text-muted-foreground mb-4">
-            Interactive map with InfoWindows, custom markers, real-time updates, river paths, and clustering.
+            Interactive map with custom named stations, InfoWindows, real-time updates, river paths, and clustering.
           </p>
           <div className="river-card p-4 text-xs font-mono bg-background/50 text-left overflow-x-auto">
             <code>
+              ✓ Custom station names for each device<br />
               ✓ Custom marker icons with status colors<br />
               ✓ InfoWindows with detailed station data<br />
               ✓ Real-time WebSocket data integration<br />
