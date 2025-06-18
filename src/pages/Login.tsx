@@ -5,15 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Droplets, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    role: ''
+    password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -116,21 +114,6 @@ const Login = () => {
                   )}
                 </Button>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="role" className="text-white">Role</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger className="bg-background/20 border-secondary text-white">
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">Administrator</SelectItem>
-                  <SelectItem value="operator">Operator</SelectItem>
-                  <SelectItem value="analyst">Data Analyst</SelectItem>
-                  <SelectItem value="viewer">Viewer</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <Button 
