@@ -208,12 +208,12 @@ const Dashboard: React.FC = () => {
           type="lead" 
         />
         <WaterQualityCard 
-          title="Mercury Cyanide" 
+          title="Cyanide" 
           value={0.003} 
           unit="mg/L" 
           change={-0.2} 
           status="positive" 
-          type="mercury" 
+          type="Cyanide" 
         />
       </div>
       
