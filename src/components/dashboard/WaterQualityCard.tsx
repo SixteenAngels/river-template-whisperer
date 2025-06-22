@@ -9,7 +9,7 @@ interface WaterQualityCardProps {
   unit: string;
   change?: number;
   status?: 'positive' | 'negative' | 'neutral';
-  type: 'ph' | 'oxygen' | 'temperature' | 'flow' | 'lead' | 'mercury';
+  type: 'ph' | 'oxygen' | 'temperature' | 'flow' | 'lead' | 'mercury' | 'Cyanide';
 }
 
 const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
@@ -28,6 +28,7 @@ const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
       case 'flow': return <Timer className="h-5 w-5" />;
       case 'lead': return <TestTube className="h-5 w-5" />;
       case 'mercury': return <FlaskRound className="h-5 w-5" />;
+      case 'Cyanide': return <TestTube className="h-5 w-5" />;
       default: return <Droplets className="h-5 w-5" />;
     }
   };
