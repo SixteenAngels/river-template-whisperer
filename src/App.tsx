@@ -28,8 +28,7 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // WebSocket configuration for Django backend
-  // Update these URLs to match your Django server
+  // WebSocket configuration using environment variables
   const wsConfig = {
     url: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
     protocols: [],
