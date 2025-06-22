@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-4 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">River Dashboard</h1>
+        <h1 className="text-2xl font-bold">River dashboard</h1>
         <div className="flex items-center space-x-2">
           <span className="text-sm">Last updated: </span>
           <span className="text-sm text-river-blue-light">April 30, 2025 14:30</span>

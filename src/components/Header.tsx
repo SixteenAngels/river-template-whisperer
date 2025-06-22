@@ -18,7 +18,7 @@ const Header: React.FC = () => {
       <nav className="hidden md:flex items-center space-x-1">
         <NavLink to="/" active={currentPath === '/'}>
           <BarChart3 className="h-4 w-4 mr-2" />
-          Dashboard
+          dashboard
         </NavLink>
         <NavLink to="/map" active={currentPath === '/map'}>
           <Map className="h-4 w-4 mr-2" />
