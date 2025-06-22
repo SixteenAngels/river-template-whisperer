@@ -28,13 +28,16 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // WebSocket configuration - update this URL to match your Django backend
+  // WebSocket configuration for Django backend
+  // Update these URLs to match your Django server
   const wsConfig = {
     url: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
     protocols: [],
     reconnectAttempts: 5,
     reconnectInterval: 3000
   };
+
+  console.log('Connecting to WebSocket at:', wsConfig.url);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -51,7 +54,6 @@ const App = () => {
               <Route path="/alerts" element={<Alerts />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

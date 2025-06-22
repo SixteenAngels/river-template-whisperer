@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import WaterQualityCard from './WaterQualityCard';
 import WaterLevelChart from './WaterLevelChart';
 import PollutionChart from './PollutionChart';
 import StationsMap from './StationsMap';
 import WaterFlowGauge from './WaterFlowGauge';
+import RealTimeDataWidget from './RealTimeDataWidget';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Info, Cpu } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -164,6 +164,9 @@ const Dashboard: React.FC = () => {
           <span className="text-muted-foreground">{selectedDeviceData.location}</span>
         </div>
       </div>
+      
+      {/* Real-time data from Django */}
+      <RealTimeDataWidget />
       
       {/* Water quality metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
