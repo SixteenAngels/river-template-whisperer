@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./components/SplashScreen";
+import SensorDashboardPage from "./pages/SensorDashboard";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/sensors" element={<SensorDashboardPage />} />
               <Route path="/map" element={<Map />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/alerts" element={<Alerts />} />
