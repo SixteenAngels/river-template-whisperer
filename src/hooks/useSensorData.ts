@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { SensorService } from '@/services/sensorService';
-import { SensorSchema, SensorData } from '@/types/sensor';
+import { SensorSchema, SensorReading } from '@/types/sensor';
 
 export const useSensorData = () => {
   const [schema, setSchema] = useState<SensorSchema | null>(null);
-  const [sensors, setSensors] = useState<SensorData[]>([]);
+  const [sensors, setSensors] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
