@@ -1,33 +1,16 @@
 
 import React, { useEffect } from 'react';
-import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import SensorTable from './SensorTable';
+import WebSocketStatusIndicator from './WebSocketStatusIndicator';
 import { useSensorData } from '@/hooks/useSensorData';
 import { useSensorWebSocket } from '@/hooks/useSensorWebSocket';
 
 const SensorDashboard: React.FC = () => {
   const { schema, sensors, loading, error, refetch } = useSensorData();
-  const { isConnected, lastMessage } = useSensorWebSocket();
-
-  // Handle real-time updates from WebSocket
-  useEffect(() => {
-    if (lastMessage) {
-      console.log('Received real-time sensor update:', lastMessage);
-      // In a production app, you'd update the sensors state here
-      // For now, we'll just log it and could trigger a refetch
-    }
-  }, [lastMessage]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-muted-foreground">Loading sensor data...</span>
-      </div>
-    );
-  }
+  const { isConnected, latestReading, allReadings, error: wsError, reconnect } = useSensorWebSocket();
 
   return (
     <div className="space-y-6">
@@ -40,21 +23,13 @@ const SensorDashboard: React.FC = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {/* WebSocket Status */}
-          <div className="flex items-center gap-2 text-sm">
-            {isConnected ? (
-              <>
-                <Wifi className="h-4 w-4 text-green-500" />
-                <span className="text-green-600">Live</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-4 w-4 text-red-500" />
-                <span className="text-red-600">Offline</span>
-              </>
-            )}
-          </div>
+          <WebSocketStatusIndicator 
+            isConnected={isConnected}
+            error={wsError}
+            onReconnect={reconnect}
+          />
           
           {/* Refresh Button */}
           <Button 
@@ -84,14 +59,35 @@ const SensorDashboard: React.FC = () => {
             Model: <code className="bg-background px-1 rounded">{schema.model}</code>
           </p>
           <p className="text-sm text-muted-foreground">
-            Fields: <code className="bg-background px-1 rounded">{schema.fields.join(', ')}</code>
+            Fields: <code className="bg-background px-1 rounded">
+              {schema.fields.map(f => f.name).join(', ')}
+            </code>
           </p>
         </div>
       )}
 
+      {/* Live Data Alert */}
+      {latestReading && (
+        <Alert>
+          <AlertDescription>
+            🟢 Latest reading received at {new Date(latestReading.timestamp || '').toLocaleTimeString()}
+            {latestReading.device_id && ` from device ${latestReading.device_id}`}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Sensor Data Table */}
       {schema ? (
-        <SensorTable schema={schema} sensors={sensors} />
+        <SensorTable 
+          schema={schema} 
+          readings={allReadings.length > 0 ? allReadings : sensors}
+          latestReading={latestReading}
+        />
+      ) : loading ? (
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Loading sensor schema...</span>
+        </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
           Unable to load sensor schema
@@ -100,10 +96,10 @@ const SensorDashboard: React.FC = () => {
 
       {/* Stats */}
       <div className="text-sm text-muted-foreground text-center">
-        Showing {sensors.length} sensor record{sensors.length !== 1 ? 's' : ''}
-        {lastMessage && (
-          <span className="ml-4">
-            Last update: {new Date().toLocaleTimeString()}
+        Showing {allReadings.length > 0 ? allReadings.length : sensors.length} sensor record{(allReadings.length > 0 ? allReadings.length : sensors.length) !== 1 ? 's' : ''}
+        {isConnected && (
+          <span className="ml-4 text-green-600">
+            ● Live connection active
           </span>
         )}
       </div>

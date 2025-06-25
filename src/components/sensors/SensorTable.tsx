@@ -1,30 +1,45 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SensorSchema, SensorData } from '@/types/sensor';
+import { SensorSchema, SensorReading } from '@/types/sensor';
 
 interface SensorTableProps {
   schema: SensorSchema;
-  sensors: SensorData[];
+  readings: SensorReading[];
+  latestReading?: SensorReading | null;
 }
 
-const SensorTable: React.FC<SensorTableProps> = ({ schema, sensors }) => {
-  const formatValue = (value: any): string => {
+const SensorTable: React.FC<SensorTableProps> = ({ schema, readings, latestReading }) => {
+  const formatValue = (value: any, fieldType: string): string => {
     if (value === null || value === undefined) {
       return '-';
     }
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
+    
+    // Format based on field type
+    switch (fieldType) {
+      case 'DecimalField':
+      case 'FloatField':
+        return typeof value === 'number' ? value.toFixed(2) : String(value);
+      case 'DateTimeField':
+        return value ? new Date(value).toLocaleString() : '-';
+      case 'BooleanField':
+        return value ? 'Yes' : 'No';
+      default:
+        return String(value);
     }
-    return String(value);
   };
 
-  const formatHeader = (field: string): string => {
-    return field
+  const formatHeader = (fieldName: string): string => {
+    return fieldName
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   };
+
+  // Get display fields (exclude auto fields like auto_now, auto_now_add)
+  const displayFields = schema.fields.filter(field => 
+    !field.auto_now && !field.auto_now_add
+  );
 
   if (!schema.fields || schema.fields.length === 0) {
     return (
@@ -34,34 +49,40 @@ const SensorTable: React.FC<SensorTableProps> = ({ schema, sensors }) => {
     );
   }
 
+  // Combine all readings with latest at top if it's new
+  const allData = latestReading ? [latestReading, ...readings.filter(r => r.id !== latestReading.id)] : readings;
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            {schema.fields.map((field) => (
-              <TableHead key={field}>
-                {formatHeader(field)}
+            {displayFields.map((field) => (
+              <TableHead key={field.name}>
+                {formatHeader(field.name)}
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sensors.length === 0 ? (
+          {allData.length === 0 ? (
             <TableRow>
               <TableCell 
-                colSpan={schema.fields.length} 
+                colSpan={displayFields.length} 
                 className="text-center py-8 text-muted-foreground"
               >
                 No sensor data available
               </TableCell>
             </TableRow>
           ) : (
-            sensors.map((sensor, index) => (
-              <TableRow key={sensor.id || index}>
-                {schema.fields.map((field) => (
-                  <TableCell key={field}>
-                    {formatValue(sensor[field])}
+            allData.map((reading, index) => (
+              <TableRow 
+                key={reading.id || index}
+                className={index === 0 && latestReading?.id === reading.id ? 'bg-muted/50' : ''}
+              >
+                {displayFields.map((field) => (
+                  <TableCell key={field.name}>
+                    {formatValue(reading[field.name], field.type)}
                   </TableCell>
                 ))}
               </TableRow>

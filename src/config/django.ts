@@ -18,6 +18,7 @@ export const DJANGO_CONFIG = {
   // Data endpoints
   DATA_ENDPOINTS: {
     SENSORS: 'sensors/',
+    SCHEMA: 'schema/sensor-reading/',
     DEVICES: 'devices/',
     ALERTS: 'alerts/',
   }

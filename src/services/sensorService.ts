@@ -1,12 +1,11 @@
 
-import { SensorSchema, SensorData, ApiResponse } from '@/types/sensor';
-
-const API_BASE_URL = 'http://localhost:8000/api';
+import { SensorSchema, SensorReading, ApiResponse } from '@/types/sensor';
+import { getApiUrl } from '@/config/django';
 
 export class SensorService {
   static async fetchSchema(): Promise<ApiResponse<SensorSchema>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sensors/schema/`);
+      const response = await fetch(getApiUrl('schema/sensor-reading/'));
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -21,9 +20,9 @@ export class SensorService {
     }
   }
 
-  static async fetchSensors(): Promise<ApiResponse<SensorData[]>> {
+  static async fetchSensors(): Promise<ApiResponse<SensorReading[]>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sensors/`);
+      const response = await fetch(getApiUrl('sensors/'));
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
