@@ -11,25 +11,41 @@ import { Label } from '@/components/ui/label';
 import { Droplets, Brush, Moon, Sun, Monitor } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useSettingsPersistence } from '@/hooks/useSettingsPersistence';
+
+interface DisplaySettingsValues {
+  theme: string;
+  dataVisualization: string;
+  highContrastMode: boolean;
+  animatedTransitions: boolean;
+  mapStyle: string;
+  fontSize: string;
+  colorMode: string;
+}
+
+const defaultDisplaySettings: DisplaySettingsValues = {
+  theme: 'river',
+  dataVisualization: 'charts',
+  highContrastMode: false,
+  animatedTransitions: true,
+  mapStyle: 'satellite',
+  fontSize: 'medium',
+  colorMode: 'system'
+};
 
 const DisplaySettings = () => {
-  const form = useForm({
-    defaultValues: {
-      theme: 'dark',
-      dataVisualization: 'charts',
-      highContrastMode: false,
-      animatedTransitions: true,
-      mapStyle: 'satellite',
-      fontSize: 'medium',
-      colorMode: 'system'
-    }
+  const form = useForm<DisplaySettingsValues>({
+    defaultValues: defaultDisplaySettings
   });
 
-  const onSubmit = (data: any) => {
+  const { saveSettings } = useSettingsPersistence(form, 'display-settings');
+
+  const onSubmit = (data: DisplaySettingsValues) => {
     console.log('Display settings updated:', data);
+    saveSettings(data);
     toast({
       title: "Settings saved",
-      description: "Your display preferences have been updated."
+      description: "Your display preferences have been updated and saved."
     });
   };
 

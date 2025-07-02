@@ -12,7 +12,10 @@ export const useSettingsPersistence = <T extends Record<string, any>>(
     if (savedSettings) {
       try {
         const parsedSettings = JSON.parse(savedSettings);
-        form.reset(parsedSettings);
+        // Use setTimeout to ensure form is ready
+        setTimeout(() => {
+          form.reset(parsedSettings);
+        }, 0);
       } catch (error) {
         console.error('Failed to load saved settings:', error);
       }
