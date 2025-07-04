@@ -21,8 +21,8 @@ const Map = () => {
     <div className="flex min-h-screen flex-col bg-river">
       <Header />
       <main className="flex-1 p-4 md:p-6 space-y-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start">
-          <div className="w-full md:w-3/4">
+        <div className="flex flex-col lg:flex-row gap-4 items-start">
+          <div className="w-full lg:w-3/4">
             <Card className="river-card overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -37,14 +37,14 @@ const Map = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="h-[600px] w-full">
+                <div className="h-[400px] sm:h-[500px] lg:h-[600px] w-full">
                   <RiverMapView />
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          <div className="w-full md:w-1/4 space-y-4">
+          <div className="w-full lg:w-1/4 space-y-4">
             <Card className="river-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -82,9 +82,9 @@ const Map = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-[200px] sm:max-h-[300px] overflow-y-auto pr-2">
                   {['Station Alpha', 'Station Beta', 'Station Gamma', 'Station Delta', 'Station Epsilon'].map((station, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-secondary/50 cursor-pointer">
+                    <div key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-secondary/50 cursor-pointer transition-colors">
                       <span className="text-sm">{station}</span>
                       <div className={`h-2 w-2 rounded-full ${index === 4 ? 'bg-river-danger' : index === 2 ? 'bg-river-warning' : 'bg-river-success'}`}></div>
                     </div>
@@ -93,7 +93,6 @@ const Map = () => {
               </CardContent>
             </Card>
 
-            {/* WebSocket Testing Card */}
             <Card className="river-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">WebSocket Test</CardTitle>
@@ -101,13 +100,17 @@ const Map = () => {
               <CardContent>
                 <button 
                   onClick={handleTestMessage}
-                  className="w-full px-3 py-2 bg-river-blue-light text-white rounded text-sm hover:bg-river-blue-light/80"
+                  className="w-full px-3 py-2 bg-river-blue-light text-white rounded text-sm hover:bg-river-blue-light/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!isConnected}
                 >
                   Send Test Message
                 </button>
                 <div className="mt-2 text-xs text-muted-foreground">
                   Messages received: {mapData.length}
+                </div>
+                <div className="mt-1 text-xs">
+                  <span className={`inline-block w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                  {isConnected ? 'Connected' : 'Disconnected'}
                 </div>
               </CardContent>
             </Card>
