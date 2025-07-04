@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Droplets, BarChart3, Map, AlertCircle, Settings, Menu, X } from 'lucide-react';
+import { Droplets, BarChart3, Map, AlertCircle, Settings, Menu, X, Activity } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
