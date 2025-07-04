@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { SensorReading } from '@/types/sensor';
 import { getWebSocketUrl } from '@/config/django';
@@ -10,23 +11,27 @@ export const useSensorWebSocket = () => {
   const ws = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
-  const reconnectInterval = useRef(3000);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUnmountedRef = useRef(false);
 
   const connect = () => {
+    if (isUnmountedRef.current) return;
+    
     try {
       const wsUrl = getWebSocketUrl();
       console.log('Connecting to WebSocket:', wsUrl);
       ws.current = new WebSocket(wsUrl);
       
       ws.current.onopen = () => {
+        if (isUnmountedRef.current) return;
         console.log('✅ WebSocket connected to sensor stream');
         setIsConnected(true);
         setError(null);
         reconnectAttempts.current = 0;
-        reconnectInterval.current = 3000; // Reset interval
       };
       
       ws.current.onmessage = (event) => {
+        if (isUnmountedRef.current) return;
         try {
           const data: SensorReading = JSON.parse(event.data);
           console.log('📡 Received sensor data:', data);
@@ -52,53 +57,64 @@ export const useSensorWebSocket = () => {
         }
       };
       
-      ws.current.onclose = () => {
+      ws.current.onclose = (event) => {
+        if (isUnmountedRef.current) return;
         console.log('❌ WebSocket disconnected');
         setIsConnected(false);
         
         // Attempt reconnection with exponential backoff
-        if (reconnectAttempts.current < maxReconnectAttempts) {
+        if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
-          console.log(`🔄 Attempting to reconnect... (${reconnectAttempts.current}/${maxReconnectAttempts})`);
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
+          console.log(`🔄 Attempting to reconnect... (${reconnectAttempts.current}/${maxReconnectAttempts}) in ${delay}ms`);
           
-          setTimeout(() => {
-            connect();
-          }, reconnectInterval.current);
-          
-          // Exponential backoff
-          reconnectInterval.current = Math.min(reconnectInterval.current * 1.5, 30000);
-        } else {
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (!isUnmountedRef.current) {
+              connect();
+            }
+          }, delay);
+        } else if (reconnectAttempts.current >= maxReconnectAttempts) {
           setError('Failed to reconnect to WebSocket after multiple attempts');
         }
       };
       
       ws.current.onerror = (error) => {
+        if (isUnmountedRef.current) return;
         console.error('🔴 WebSocket error:', error);
         setError('WebSocket connection failed');
         setIsConnected(false);
       };
     } catch (err) {
+      if (isUnmountedRef.current) return;
       setError('Failed to create WebSocket connection');
       console.error('WebSocket creation error:', err);
     }
   };
 
   useEffect(() => {
+    isUnmountedRef.current = false;
     connect();
 
     return () => {
-      if (ws.current) {
-        ws.current.close();
+      isUnmountedRef.current = true;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.close(1000, 'Component unmounting');
       }
     };
   }, []);
 
   const reconnect = () => {
-    reconnectAttempts.current = 0;
-    reconnectInterval.current = 3000;
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+    }
     if (ws.current) {
       ws.current.close();
     }
+    reconnectAttempts.current = 0;
+    setError(null);
     connect();
   };
 

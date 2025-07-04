@@ -10,8 +10,11 @@ export const useMapWebSocket = () => {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
+  const isUnmountedRef = useRef(false);
 
   const connect = () => {
+    if (isUnmountedRef.current) return;
+    
     try {
       const wsUrl = getMapWebSocketUrl();
       console.log('[Map WebSocket] Connecting to:', wsUrl);
@@ -20,6 +23,7 @@ export const useMapWebSocket = () => {
       socketRef.current = socket;
 
       socket.onopen = () => {
+        if (isUnmountedRef.current) return;
         console.log('[Map WebSocket] Connected to maps endpoint');
         setIsConnected(true);
         setError(null);
@@ -33,6 +37,7 @@ export const useMapWebSocket = () => {
       };
 
       socket.onmessage = (event) => {
+        if (isUnmountedRef.current) return;
         console.log('[Map WebSocket] Received from server:', event.data);
         try {
           const data = JSON.parse(event.data);
@@ -44,23 +49,27 @@ export const useMapWebSocket = () => {
       };
 
       socket.onerror = (error) => {
+        if (isUnmountedRef.current) return;
         console.error('[Map WebSocket] Error:', error);
         setIsConnected(false);
         setError('WebSocket connection error');
       };
 
       socket.onclose = (event) => {
+        if (isUnmountedRef.current) return;
         console.log('[Map WebSocket] Connection closed:', event.code, event.reason);
         setIsConnected(false);
         
-        // Attempt to reconnect if not intentionally closed
+        // Attempt to reconnect with exponential backoff
         if (event.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
           console.log(`[Map WebSocket] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
           
           reconnectTimeoutRef.current = setTimeout(() => {
-            connect();
+            if (!isUnmountedRef.current) {
+              connect();
+            }
           }, delay);
         } else if (reconnectAttempts.current >= maxReconnectAttempts) {
           setError('Failed to reconnect after multiple attempts');
@@ -68,15 +77,18 @@ export const useMapWebSocket = () => {
       };
 
     } catch (err) {
+      if (isUnmountedRef.current) return;
       console.error('[Map WebSocket] Failed to create connection:', err);
       setError('Failed to create WebSocket connection');
     }
   };
 
   useEffect(() => {
+    isUnmountedRef.current = false;
     connect();
 
     return () => {
+      isUnmountedRef.current = true;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
