@@ -2,10 +2,21 @@
 import React from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Info, MapPin, Navigation } from 'lucide-react';
+import { Info, MapPin, Navigation, Zap } from 'lucide-react';
 import RiverMapView from '@/components/maps/RiverMapView';
+import { useMapWebSocket } from '@/hooks/useMapWebSocket';
 
 const Map = () => {
+  const { isConnected, mapData, sendMessage } = useMapWebSocket();
+
+  const handleTestMessage = () => {
+    sendMessage({
+      type: 'test',
+      message: 'Test message from map page',
+      timestamp: new Date().toISOString()
+    });
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-river">
       <Header />
@@ -17,6 +28,12 @@ const Map = () => {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Navigation className="h-5 w-5 text-river-purple-light" />
                   River Monitoring Map
+                  <div className="ml-auto flex items-center gap-2">
+                    <Zap className={`h-4 w-4 ${isConnected ? 'text-river-success' : 'text-river-danger'}`} />
+                    <span className="text-sm">
+                      {isConnected ? 'Live Data' : 'Offline'}
+                    </span>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
@@ -72,6 +89,25 @@ const Map = () => {
                       <div className={`h-2 w-2 rounded-full ${index === 4 ? 'bg-river-danger' : index === 2 ? 'bg-river-warning' : 'bg-river-success'}`}></div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* WebSocket Testing Card */}
+            <Card className="river-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">WebSocket Test</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <button 
+                  onClick={handleTestMessage}
+                  className="w-full px-3 py-2 bg-river-blue-light text-white rounded text-sm hover:bg-river-blue-light/80"
+                  disabled={!isConnected}
+                >
+                  Send Test Message
+                </button>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Messages received: {mapData.length}
                 </div>
               </CardContent>
             </Card>

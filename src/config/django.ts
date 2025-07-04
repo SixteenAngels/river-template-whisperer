@@ -3,6 +3,7 @@
 export const DJANGO_CONFIG = {
   // WebSocket URL for real-time data
   WEBSOCKET_URL: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
+  MAPS_WEBSOCKET_URL: import.meta.env.VITE_WS_MAPS_URL || 'ws://localhost:8000/ws/maps/',
   
   // REST API base URL
   API_BASE_URL: import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000/api/',
@@ -32,4 +33,9 @@ export const getApiUrl = (endpoint: string): string => {
 // Helper function to get WebSocket URL
 export const getWebSocketUrl = (): string => {
   return DJANGO_CONFIG.WEBSOCKET_URL;
+};
+
+// Helper function to get Map WebSocket URL
+export const getMapWebSocketUrl = (): string => {
+  return DJANGO_CONFIG.MAPS_WEBSOCKET_URL;
 };
