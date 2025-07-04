@@ -14,6 +14,7 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import SplashScreen from "./components/SplashScreen";
 import SensorDashboardPage from "./pages/SensorDashboard";
+import WebSocketTestPage from "./pages/WebSocketTest";
 import { WebSocketProvider } from "./providers/WebSocketProvider";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/sensors" element={<SensorDashboardPage />} />
+              <Route path="/websocket-test" element={<WebSocketTestPage />} />
               <Route path="/map" element={<Map />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/alerts" element={<Alerts />} />
