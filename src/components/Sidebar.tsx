@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
-  Sidebar,
   SidebarContent,
   SidebarHeader,
   SidebarFooter,
@@ -32,8 +31,9 @@ type NavItemProps = {
   label: string;
 };
 
-const Sidebar: React.FC = () => {
-  const { collapsed } = useSidebar();
+const AppSidebar: React.FC = () => {
+  const { state } = useSidebar();
+  const collapsed = state === 'collapsed';
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = React.useState(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState(true);
@@ -76,7 +76,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <Sidebar className={collapsed ? "w-16" : "w-64"} variant="floating">
+    <div className={collapsed ? "w-16" : "w-64"}>
       <SidebarHeader className="px-3 pt-4 pb-2">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-river-purple-light/20">
@@ -137,8 +137,8 @@ const Sidebar: React.FC = () => {
           </Button>
         </div>
       </SidebarFooter>
-    </Sidebar>
+    </div>
   );
 };
 
-export default Sidebar;
+export default AppSidebar;

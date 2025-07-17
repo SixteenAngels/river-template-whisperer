@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Droplet, Zap, Activity, Battery, ThermometerSnowflake, Flask, AlertTriangle, Download, History, Map as MapIcon, Settings, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Droplet, Zap, Activity, Battery, ThermometerSnowflake, TestTube, AlertTriangle, Download, History, Map as MapIcon, Settings, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -239,7 +238,7 @@ const DeviceDetail: React.FC = () => {
                     { label: 'pH Level', value: device.ph.toFixed(1), icon: Droplet, color: 'river-blue-light' },
                     { label: 'Turbidity', value: `${device.turbidity} NTU`, icon: Activity, color: 'river-purple-light' },
                     { label: 'Conductivity', value: `${device.conductivity} μS/cm`, icon: Zap, color: 'river-success' },
-                    { label: 'ISE Value', value: `${device.ise} mV`, icon: Flask, color: 'river-warning' },
+                    { label: 'ISE Value', value: `${device.ise} mV`, icon: TestTube, color: 'river-warning' },
                     { label: 'Mercury', value: `${device.mercury} ppb`, icon: AlertTriangle, color: 'river-danger' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between border-b border-secondary/30 pb-2 last:border-0 last:pb-0">
