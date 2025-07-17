@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
-import WaterQualityCard from './WaterQualityCard';
-import WaterLevelChart from './WaterLevelChart';
-import PollutionChart from './PollutionChart';
-import StationsMap from './StationsMap';
-import WaterFlowGauge from './WaterFlowGauge';
-import RealTimeDataWidget from './RealTimeDataWidget';
+import WaterQualityCard from '../components/dashboard/WaterQualityCard';
+import WaterLevelChart from '../components/dashboard/WaterLevelChart';
+import PollutionChart from '../components/dashboard/PollutionChart';
+import StationsMap from '../components/dashboard/StationsMap';
+import WaterFlowGauge from '../components/dashboard/WaterFlowGauge';
+import RealTimeDataWidget from '../components/dashboard/RealTimeDataWidget';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Info, Cpu } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
