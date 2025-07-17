@@ -14,15 +14,19 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
+  Sidebar as SidebarComponent,
   SidebarContent,
-  SidebarHeader,
   SidebarFooter,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarTrigger,
   useSidebar,
-  Sidebar
 } from './ui/sidebar';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,7 +36,7 @@ type NavItemProps = {
   label: string;
 };
 
-const AppSidebar: React.FC = () => {
+const Sidebar: React.FC = () => {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const navigate = useNavigate();
@@ -78,68 +82,70 @@ const AppSidebar: React.FC = () => {
 
   return (
     <div className={collapsed ? "w-16" : "w-64"}>
-      <SidebarHeader className="px-3 pt-4 pb-2">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
-            <span className="text-primary font-bold">RW</span>
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm text-foreground">River Watcher</span>
-              <span className="text-xs text-muted-foreground">IoT Monitoring</span>
+      <SidebarComponent>
+        <SidebarHeader className="px-3 pt-4 pb-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+              <span className="text-primary font-bold">RW</span>
             </div>
-          )}
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent>
-        <SidebarMenu>
-          {navItems.map((item) => (
-            <NavItem key={item.to} {...item} />
-          ))}
-        </SidebarMenu>
-      </SidebarContent>
-
-      <SidebarFooter className="p-3">
-        <SidebarSeparator />
-        <div className="flex flex-col gap-2 pt-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            onClick={toggleTheme}
-          >
-            {darkMode ? (
-              <Sun className="h-4 w-4 mr-3" />
-            ) : (
-              <Moon className="h-4 w-4 mr-3" />
+            {!collapsed && (
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm text-foreground">River Watcher</span>
+                <span className="text-xs text-muted-foreground">IoT Monitoring</span>
+              </div>
             )}
-            {!collapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
-          </Button>
+          </div>
+        </SidebarHeader>
 
-          <Button
-            variant="ghost" 
-            size="sm"
-            className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/settings')}
-          >
-            <Settings className="h-4 w-4 mr-3" />
-            {!collapsed && <span>Settings</span>}
-          </Button>
+        <SidebarContent>
+          <SidebarMenu>
+            {navItems.map((item) => (
+              <NavItem key={item.to} {...item} />
+            ))}
+          </SidebarMenu>
+        </SidebarContent>
 
-          <Button
-            variant="ghost"
-            size="sm" 
-            className="w-full justify-start text-destructive hover:text-destructive"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4 mr-3" />
-            {!collapsed && <span>Logout</span>}
-          </Button>
-        </div>
-      </SidebarFooter>
+        <SidebarFooter className="p-3">
+          <SidebarSeparator />
+          <div className="flex flex-col gap-2 pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              onClick={toggleTheme}
+            >
+              {darkMode ? (
+                <Sun className="h-4 w-4 mr-3" />
+              ) : (
+                <Moon className="h-4 w-4 mr-3" />
+              )}
+              {!collapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
+            </Button>
+
+            <Button
+              variant="ghost" 
+              size="sm"
+              className="w-full justify-start text-muted-foreground hover:text-foreground"
+              onClick={() => navigate('/settings')}
+            >
+              <Settings className="h-4 w-4 mr-3" />
+              {!collapsed && <span>Settings</span>}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm" 
+              className="w-full justify-start text-destructive hover:text-destructive"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-3" />
+              {!collapsed && <span>Logout</span>}
+            </Button>
+          </div>
+        </SidebarFooter>
+      </SidebarComponent>
     </div>
   );
 };
 
-export default AppSidebar;
+export default Sidebar;
