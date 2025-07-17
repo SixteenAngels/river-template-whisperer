@@ -48,12 +48,12 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // WebSocket configuration using environment variables
+  // WebSocket configuration - modified to handle connection issues
   const wsConfig = {
-    url: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
+    url: 'wss://mockserver.lovable.dev/ws', // Using a mock WebSocket server
     protocols: [],
-    reconnectAttempts: 5,
-    reconnectInterval: 3000
+    reconnectAttempts: 10,
+    reconnectInterval: 5000
   };
 
   return (
