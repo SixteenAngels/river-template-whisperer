@@ -8,7 +8,7 @@ import { SidebarProvider } from './ui/sidebar';
 const AppLayout: React.FC = () => {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-river">
+      <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />

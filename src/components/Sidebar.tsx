@@ -21,7 +21,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarSeparator,
-  useSidebar
+  useSidebar,
+  Sidebar
 } from './ui/sidebar';
 import { useNavigate } from 'react-router-dom';
 
@@ -64,7 +65,7 @@ const AppSidebar: React.FC = () => {
           <NavLink 
             to={to} 
             className={({ isActive }) => 
-              `flex items-center ${isActive ? 'text-river-purple-light font-medium' : 'text-river-foreground/70 hover:text-river-foreground'}`
+              `flex items-center ${isActive ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground'}`
             }
           >
             <Icon className="h-5 w-5 mr-3" />
@@ -79,13 +80,13 @@ const AppSidebar: React.FC = () => {
     <div className={collapsed ? "w-16" : "w-64"}>
       <SidebarHeader className="px-3 pt-4 pb-2">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-river-purple-light/20">
-            <span className="text-river-purple-light font-bold">RW</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+            <span className="text-primary font-bold">RW</span>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-semibold text-sm text-river-foreground">River Watcher</span>
-              <span className="text-xs text-river-foreground/50">IoT Monitoring</span>
+              <span className="font-semibold text-sm text-foreground">River Watcher</span>
+              <span className="text-xs text-muted-foreground">IoT Monitoring</span>
             </div>
           )}
         </div>
@@ -119,7 +120,7 @@ const AppSidebar: React.FC = () => {
           <Button
             variant="ghost" 
             size="sm"
-            className="w-full justify-start text-river-foreground/70 hover:text-river-foreground"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
             onClick={() => navigate('/settings')}
           >
             <Settings className="h-4 w-4 mr-3" />
@@ -129,7 +130,7 @@ const AppSidebar: React.FC = () => {
           <Button
             variant="ghost"
             size="sm" 
-            className="w-full justify-start text-river-danger hover:text-river-danger"
+            className="w-full justify-start text-destructive hover:text-destructive"
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4 mr-3" />
