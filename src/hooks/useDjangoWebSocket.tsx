@@ -10,50 +10,78 @@ export interface DjangoMessage {
   timestamp?: string;
 }
 
+export interface TelemetryData {
+  device: string;
+  fw: string;
+  ph: number;
+  turbidity: number;
+  conductivity: number;
+  ise_value: number;
+  mercury_ppb: number;
+  battery_v: number;
+  gps: { lat: number; lon: number };
+  location_source: string;
+}
+
 export const useDjangoWebSocket = () => {
   const { isConnected, lastMessage, sendMessage, error } = useWebSocketContext();
   const [sensorData, setSensorData] = useState<WaterQualityData[]>([]);
+  const [telemetryData, setTelemetryData] = useState<TelemetryData | null>(null);
   const [deviceStatuses, setDeviceStatuses] = useState<Record<string, any>>({});
 
   // Handle incoming messages from Django
   useEffect(() => {
     if (lastMessage) {
-      const djangoMessage = lastMessage as DjangoMessage;
-      
-      switch (djangoMessage.type) {
-        case 'sensor_data':
-          if (djangoMessage.data) {
-            const newData: WaterQualityData = {
-              timestamp: djangoMessage.timestamp || new Date().toISOString(),
-              pH: djangoMessage.data.ph || 0,
-              temperature: djangoMessage.data.temperature || 0,
-              turbidity: djangoMessage.data.turbidity || 0,
-              dissolvedOxygen: djangoMessage.data.dissolved_oxygen || 0,
-              stationId: djangoMessage.device_id || 'unknown'
+      try {
+        // Handle direct telemetry data or wrapped Django message
+        let telemetryMessage: TelemetryData;
+        const messageData = lastMessage as any;
+        
+        if (messageData.device && messageData.fw) {
+          // Direct telemetry data format
+          telemetryMessage = messageData as TelemetryData;
+        } else if (messageData.type === 'sensor_data' && messageData.data) {
+          // Django wrapped message format
+          telemetryMessage = messageData.data as TelemetryData;
+        } else {
+          // Try to parse as raw telemetry if it has the expected structure
+          if (messageData.ph !== undefined || messageData.turbidity !== undefined) {
+            telemetryMessage = {
+              device: messageData.device || 'river-watcher-23',
+              fw: messageData.fw || '1.0.0',
+              ph: messageData.ph || 0,
+              turbidity: messageData.turbidity || 0,
+              conductivity: messageData.conductivity || 0,
+              ise_value: messageData.ise_value || 0,
+              mercury_ppb: messageData.mercury_ppb || 0,
+              battery_v: messageData.battery_v || 0,
+              gps: messageData.gps || { lat: 0, lon: 0 },
+              location_source: messageData.location_source || 'websocket'
             };
-            
-            setSensorData(prev => {
-              const updated = [...prev, newData];
-              return updated.slice(-50); // Keep last 50 readings
-            });
+          } else {
+            return; // Not telemetry data
           }
-          break;
-          
-        case 'device_status':
-          if (djangoMessage.device_id) {
-            setDeviceStatuses(prev => ({
-              ...prev,
-              [djangoMessage.device_id!]: djangoMessage.data
-            }));
-          }
-          break;
-          
-        case 'alert':
-          console.log('Received alert from Django:', djangoMessage.data);
-          break;
-          
-        default:
-          console.log('Unknown message type from Django:', djangoMessage);
+        }
+        
+        // Update telemetry data
+        setTelemetryData(telemetryMessage);
+        
+        // Convert to WaterQualityData format for charts
+        const waterQualityData: WaterQualityData = {
+          timestamp: new Date().toISOString(),
+          pH: telemetryMessage.ph || 0,
+          temperature: 0, // Not available in telemetry, could map from other field
+          turbidity: telemetryMessage.turbidity || 0,
+          dissolvedOxygen: 0, // Not available in telemetry
+          stationId: telemetryMessage.device || 'unknown'
+        };
+        
+        setSensorData(prev => {
+          const updated = [...prev, waterQualityData];
+          return updated.slice(-50); // Keep last 50 readings
+        });
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
       }
     }
   }, [lastMessage]);
@@ -110,6 +138,7 @@ export const useDjangoWebSocket = () => {
     isConnected,
     error,
     sensorData,
+    telemetryData,
     deviceStatuses,
     sendSensorData,
     sendDeviceStatus,

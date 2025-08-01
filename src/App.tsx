@@ -48,9 +48,9 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // WebSocket configuration - modified to handle connection issues
+  // WebSocket configuration for Django backend
   const wsConfig = {
-    url: 'wss://mockserver.lovable.dev/ws', // Using a mock WebSocket server
+    url: import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/sensors/',
     protocols: [],
     reconnectAttempts: 10,
     reconnectInterval: 5000
