@@ -16,7 +16,7 @@ interface WaterQualityCardProps {
   unit: string;
   change?: number;
   status?: 'positive' | 'negative' | 'neutral';
-  type: 'ph' | 'oxygen' | 'temperature' | 'flow' | 'lead' | 'mercury' | 'Cyanide' | 'battery';
+  type: 'ph' | 'oxygen' | 'temperature' | 'flow' | 'lead' | 'mercury' | 'Cyanide' | 'battery' | 'turbidity' | 'conductivity' | 'ise';
 }
 
 const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
@@ -32,7 +32,10 @@ const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
       case 'ph': return <Droplets className="h-5 w-5" />;
       case 'oxygen': return <Activity className="h-5 w-5" />;
       case 'temperature': return <ThermometerIcon className="h-5 w-5" />;
+      case 'turbidity': return <ThermometerIcon className="h-5 w-5" />;
       case 'flow': return <Timer className="h-5 w-5" />;
+      case 'conductivity': return <Timer className="h-5 w-5" />;
+      case 'ise': return <TestTube className="h-5 w-5" />;
       case 'lead': return <TestTube className="h-5 w-5" />;
       case 'mercury': return <FlaskRound className="h-5 w-5" />;
       case 'battery': return <Battery className="h-5 w-5" />;
@@ -57,9 +60,9 @@ const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
   };
   
   return (
-    <div className="metric-card group">
-      <div className="flex items-center justify-between mb-4">
-        <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+    <div className="bg-card border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-muted-foreground">
           {getIcon()}
         </div>
         {change !== undefined && change !== 0 && (
@@ -70,18 +73,15 @@ const WaterQualityCard: React.FC<WaterQualityCardProps> = ({
         )}
       </div>
       
-      <div className="space-y-2">
-        <h3 className="metric-label">{title}</h3>
+      <div className="space-y-1">
+        <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
         <div className="flex items-baseline space-x-2">
-          <span className="metric-value">
-            {typeof value === 'number' ? value.toFixed(2) : value}
+          <span className="text-2xl font-bold">
+            {typeof value === 'number' ? value.toFixed(2) : value || '--'}
           </span>
-          <span className="text-sm text-muted-foreground font-medium">{unit}</span>
+          <span className="text-sm text-muted-foreground">{unit}</span>
         </div>
       </div>
-      
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
     </div>
   );
 };
