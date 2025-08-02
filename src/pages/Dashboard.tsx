@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
       name: 'River Watcher 23',
       type: 'standard' as const,
       location: 'Volta River Bank',
-      status: (isConnected ? 'online' : 'offline') as 'online' | 'offline' | 'maintenance',
+      status: (telemetry ? 'online' : 'offline') as 'online' | 'offline' | 'maintenance',
       batteryLevel: telemetry?.battery_v ?? 0,
       signalStrength: 100,
       active: true,
@@ -78,8 +78,8 @@ const Dashboard: React.FC = () => {
         <h1 className="text-2xl font-bold">River dashboard</h1>
         <div className="flex items-center space-x-2">
           <span className="text-sm">Live:</span>
-          <span className={`text-sm ${isConnected ? 'text-green-500' : 'text-red-500'}`}>
-            {isConnected ? 'Connected' : 'Disconnected'}
+          <span className={`text-sm ${isConnected ? 'text-green-500' : telemetry ? 'text-yellow-500' : 'text-red-500'}`}>
+            {isConnected ? 'Connected' : telemetry ? 'Mock Data' : 'Disconnected'}
           </span>
         </div>
       </div>
