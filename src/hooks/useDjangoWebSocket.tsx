@@ -29,40 +29,6 @@ export const useDjangoWebSocket = () => {
   const [telemetryData, setTelemetryData] = useState<TelemetryData | null>(null);
   const [deviceStatuses, setDeviceStatuses] = useState<Record<string, any>>({});
 
-  // Mock data for testing when WebSocket is not connected
-  const mockTelemetryData: TelemetryData = {
-    device: "river-watcher-23",
-    fw: "1.0.0",
-    ph: 7.12,
-    turbidity: 18.5,
-    conductivity: 150.1,
-    ise_value: 0.3,
-    mercury_ppb: 0.1,
-    battery_v: 3.8,
-    gps: { lat: 5.6037, lon: -0.1870 },
-    location_source: "mock"
-  };
-
-  // Use mock data when not connected
-  useEffect(() => {
-    if (!isConnected && !telemetryData) {
-      console.log('Using mock telemetry data');
-      setTelemetryData(mockTelemetryData);
-      
-      // Convert to WaterQualityData format for charts
-      const waterQualityData: WaterQualityData = {
-        timestamp: new Date().toISOString(),
-        pH: mockTelemetryData.ph,
-        temperature: 22.5, // Mock temperature
-        turbidity: mockTelemetryData.turbidity,
-        dissolvedOxygen: 8.2, // Mock DO
-        stationId: mockTelemetryData.device
-      };
-      
-      setSensorData([waterQualityData]);
-    }
-  }, [isConnected, telemetryData]);
-
   // Handle incoming messages from Django
   useEffect(() => {
     if (lastMessage) {

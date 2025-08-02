@@ -56,12 +56,12 @@ const Dashboard: React.FC = () => {
       name: 'River Watcher 23',
       type: 'standard' as const,
       location: 'Volta River Bank',
-      status: (telemetry ? 'online' : 'offline') as 'online' | 'offline' | 'maintenance',
+      status: (isConnected && telemetry ? 'online' : 'offline') as 'online' | 'offline' | 'maintenance',
       batteryLevel: telemetry?.battery_v ?? 0,
-      signalStrength: 100,
+      signalStrength: isConnected ? 100 : 0,
       active: true,
-      lastSeen: new Date().toISOString(),
-      firmwareVersion: telemetry?.fw ?? '1.0.0',
+      lastSeen: telemetry ? new Date().toISOString() : new Date(Date.now() - 300000).toISOString(),
+      firmwareVersion: telemetry?.fw ?? 'Unknown',
       serialNumber: 'RW-0023',
       coordinates: { 
         latitude: telemetry?.gps.lat ?? 5.6037, 
@@ -75,12 +75,20 @@ const Dashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-4 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">River dashboard</h1>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">Live:</span>
-          <span className={`text-sm ${isConnected ? 'text-green-500' : telemetry ? 'text-yellow-500' : 'text-red-500'}`}>
-            {isConnected ? 'Connected' : telemetry ? 'Mock Data' : 'Disconnected'}
-          </span>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+          River Dashboard
+        </h1>
+        <div className="flex items-center space-x-4">
+          <WebSocketStatusIndicator 
+            isConnected={isConnected} 
+            error={error} 
+            onReconnect={() => window.location.reload()} 
+          />
+          {!isConnected && (
+            <div className="text-xs text-muted-foreground">
+              Connect your Django backend to see live data
+            </div>
+          )}
         </div>
       </div>
 
@@ -146,13 +154,67 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Sensor Cards */}
+      {!isConnected && !telemetry && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">No Backend Connection</h3>
+          <p className="text-blue-700 mb-4">
+            Connect your Django backend at <code className="bg-blue-100 px-2 py-1 rounded">ws://localhost:8000/ws/sensors/</code> to see live sensor data.
+          </p>
+          <div className="text-sm text-blue-600">
+            Make sure your Django WebSocket server is running and accessible.
+          </div>
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <WaterQualityCard title="pH Level" value={telemetry?.ph} unit="pH" change={0} status="neutral" type="ph" />
-        <WaterQualityCard title="Turbidity" value={telemetry?.turbidity} unit="NTU" change={0} status="neutral" type="turbidity" />
-        <WaterQualityCard title="Conductivity" value={telemetry?.conductivity} unit="µS/cm" change={0} status="neutral" type="conductivity" />
-        <WaterQualityCard title="ISE Value" value={telemetry?.ise_value} unit="mV" change={0} status="neutral" type="ise" />
-        <WaterQualityCard title="Mercury" value={telemetry?.mercury_ppb} unit="ppb" change={0} status="neutral" type="mercury" />
-        <WaterQualityCard title="Battery" value={telemetry?.battery_v} unit="V" change={0} status="neutral" type="battery" />
+        <WaterQualityCard 
+          title="pH Level" 
+          value={isConnected && telemetry ? telemetry.ph : "No Data"} 
+          unit="pH" 
+          change={0} 
+          status="neutral" 
+          type="ph" 
+        />
+        <WaterQualityCard 
+          title="Turbidity" 
+          value={isConnected && telemetry ? telemetry.turbidity : "No Data"} 
+          unit="NTU" 
+          change={0} 
+          status="neutral" 
+          type="turbidity" 
+        />
+        <WaterQualityCard 
+          title="Conductivity" 
+          value={isConnected && telemetry ? telemetry.conductivity : "No Data"} 
+          unit="µS/cm" 
+          change={0} 
+          status="neutral" 
+          type="conductivity" 
+        />
+        <WaterQualityCard 
+          title="ISE Value" 
+          value={isConnected && telemetry ? telemetry.ise_value : "No Data"} 
+          unit="mV" 
+          change={0} 
+          status="neutral" 
+          type="ise" 
+        />
+        <WaterQualityCard 
+          title="Mercury" 
+          value={isConnected && telemetry ? telemetry.mercury_ppb : "No Data"} 
+          unit="ppb" 
+          change={0} 
+          status="neutral" 
+          type="mercury" 
+        />
+        <WaterQualityCard 
+          title="Battery" 
+          value={isConnected && telemetry ? telemetry.battery_v : "No Data"} 
+          unit="V" 
+          change={0} 
+          status="neutral" 
+          type="battery" 
+        />
       </div>
 
       {/* Charts and Map */}
