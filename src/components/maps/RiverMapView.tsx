@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { AlertCircle, Layers, Navigation, Zap } from 'lucide-react';
+import { Navigation, Zap } from 'lucide-react';
 import { useDjangoWebSocket } from '@/hooks/useDjangoWebSocket';
-import MapInfoWindow from './MapInfoWindow';
-import MarkerIcon from './MarkerIcon';
 import { riverPathCoordinates } from './RiverPath';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Enhanced monitoring stations with custom descriptive names
 const stations = [
@@ -75,11 +75,12 @@ const stations = [
   },
 ];
 
-// Mock Google Maps implementation with enhanced features
-const MockGoogleMap = () => {
+// Mapbox implementation with enhanced features
+const MapboxMap = () => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const { sensorData, isConnected } = useDjangoWebSocket();
-  const [selectedStation, setSelectedStation] = useState<typeof stations[0] | null>(null);
-  const [showClustering, setShowClustering] = useState(true);
   const [showRiverPath, setShowRiverPath] = useState(true);
   const [realTimeStations, setRealTimeStations] = useState(stations);
 
@@ -89,7 +90,7 @@ const MockGoogleMap = () => {
       const latestData = sensorData[sensorData.length - 1];
       setRealTimeStations(prev => 
         prev.map(station => {
-          if (station.name.toLowerCase().includes(latestData.stationId.toLowerCase())) {
+          if (station.name.toLowerCase().includes(latestData.stationId?.toLowerCase() || '')) {
             return {
               ...station,
               data: {
@@ -109,62 +110,165 @@ const MockGoogleMap = () => {
     }
   }, [sensorData]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'normal': return 'bg-river-success';
-      case 'warning': return 'bg-river-warning';
-      case 'danger': return 'bg-river-danger';
-      default: return 'bg-river-blue-light';
-    }
-  };
+  // Initialize Mapbox
+  useEffect(() => {
+    if (!mapContainer.current) return;
 
-  const handleStationClick = (station: typeof stations[0]) => {
-    setSelectedStation(station);
-  };
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZG9uZnJhcyIsImEiOiJjbWU4ZXozZG4wZmR5MmpzaHM2dWlsNTVsIn0.CiZaQV8p-Rmm8bpWJ39TsA';
 
-  const clusteredStations = showClustering ? 
-    realTimeStations.reduce((clusters: any[], station) => {
-      const cluster = clusters.find(c => 
-        Math.abs(c.position.lat - station.position.lat) < 0.01 &&
-        Math.abs(c.position.lng - station.position.lng) < 0.01
-      );
-      
-      if (cluster) {
-        cluster.stations.push(station);
-        cluster.count = cluster.stations.length;
-      } else {
-        clusters.push({
-          position: station.position,
-          stations: [station],
-          count: 1
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: [-74.006, 40.7128], // NYC coordinates
+      zoom: 12,
+      pitch: 45,
+      bearing: -17.6,
+    });
+
+    // Add navigation controls
+    map.current.addControl(
+      new mapboxgl.NavigationControl({
+        visualizePitch: true,
+      }),
+      'top-left'
+    );
+
+    // Cleanup on unmount
+    return () => {
+      if (map.current) {
+        markersRef.current.forEach(marker => marker.remove());
+        map.current.remove();
+      }
+    };
+  }, []);
+
+  // Add river path
+  useEffect(() => {
+    if (!map.current) return;
+
+    map.current.on('load', () => {
+      if (showRiverPath) {
+        if (map.current?.getSource('river-path')) {
+          map.current.removeLayer('river-path');
+          map.current.removeSource('river-path');
+        }
+
+        map.current?.addSource('river-path', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: riverPathCoordinates.map(coord => [coord.lng, coord.lat])
+            }
+          }
+        });
+
+        map.current?.addLayer({
+          id: 'river-path',
+          type: 'line',
+          source: 'river-path',
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          paint: {
+            'line-color': '#60a5fa',
+            'line-width': 4,
+            'line-opacity': 0.8
+          }
         });
       }
-      return clusters;
-    }, []) : realTimeStations.map(s => ({ position: s.position, stations: [s], count: 1 }));
+    });
+  }, [showRiverPath]);
+
+  // Update markers
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add new markers
+    realTimeStations.forEach((station) => {
+      const getStatusColor = (status: string) => {
+        switch (status) {
+          case 'normal': return '#10b981';
+          case 'warning': return '#f59e0b';
+          case 'danger': return '#ef4444';
+          default: return '#60a5fa';
+        }
+      };
+
+      // Create marker element
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.style.cssText = `
+        background: ${getStatusColor(station.status)};
+        width: 20px;
+        height: 20px;
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
+      `;
+
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.2)';
+      });
+
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+      });
+
+      // Create popup
+      const popup = new mapboxgl.Popup({
+        offset: 25,
+        closeButton: true,
+        closeOnClick: true
+      }).setHTML(`
+        <div class="p-3">
+          <h3 class="font-semibold text-sm mb-2">${station.name}</h3>
+          <div class="space-y-1 text-xs">
+            <div>Status: <span class="font-medium">${station.status}</span></div>
+            <div>pH: <span class="font-medium">${station.data?.pH.toFixed(1)}</span></div>
+            <div>Temperature: <span class="font-medium">${station.data?.temperature.toFixed(1)}°C</span></div>
+            <div>Turbidity: <span class="font-medium">${station.data?.turbidity.toFixed(1)} NTU</span></div>
+            <div>Dissolved O₂: <span class="font-medium">${station.data?.dissolvedOxygen.toFixed(1)} mg/L</span></div>
+            ${isConnected && sensorData.length > 0 ? '<div class="text-green-600 font-medium">● Live Data</div>' : ''}
+          </div>
+        </div>
+      `);
+
+      // Create marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([station.position.lng, station.position.lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      markersRef.current.push(marker);
+    });
+  }, [realTimeStations, isConnected, sensorData]);
 
   return (
-    <div className="relative h-full w-full bg-secondary/30 overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden">
+      <div ref={mapContainer} className="absolute inset-0" />
+      
       {/* Map Controls */}
       <div className="absolute top-4 right-4 z-20 space-y-2">
         <Card className="river-card p-2">
           <div className="flex flex-col gap-2">
             <button
               onClick={() => setShowRiverPath(!showRiverPath)}
-              className={`flex items-center gap-2 px-3 py-2 rounded text-sm ${
+              className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors ${
                 showRiverPath ? 'bg-river-blue-light text-white' : 'hover:bg-secondary'
               }`}
             >
               <Navigation className="h-4 w-4" />
               River Path
-            </button>
-            <button
-              onClick={() => setShowClustering(!showClustering)}
-              className={`flex items-center gap-2 px-3 py-2 rounded text-sm ${
-                showClustering ? 'bg-river-purple-light text-white' : 'hover:bg-secondary'
-              }`}
-            >
-              <Layers className="h-4 w-4" />
-              Clustering
             </button>
           </div>
         </Card>
@@ -179,139 +283,13 @@ const MockGoogleMap = () => {
           </div>
         </Card>
       </div>
-
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center p-6 max-w-md">
-          <AlertCircle className="h-10 w-10 text-river-purple-light mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Enhanced Map Features</h3>
-          <p className="text-muted-foreground mb-4">
-            Interactive map with custom named stations, InfoWindows, real-time updates, river paths, and clustering.
-          </p>
-          <div className="river-card p-4 text-xs font-mono bg-background/50 text-left overflow-x-auto">
-            <code>
-              ✓ Custom station names for each device<br />
-              ✓ Custom marker icons with status colors<br />
-              ✓ InfoWindows with detailed station data<br />
-              ✓ Real-time WebSocket data integration<br />
-              ✓ River path visualization<br />
-              ✓ Marker clustering toggle<br />
-              ✓ Interactive controls
-            </code>
-          </div>
-        </div>
-      </div>
-      
-      {/* River Path Visualization */}
-      {showRiverPath && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none">
-          <path
-            d={riverPathCoordinates.map((coord, index) => {
-              const x = (coord.lng + 74.1) * 1000 + 100;
-              const y = (41 - coord.lat) * 1000 + 100;
-              return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-            }).join(' ')}
-            stroke="#60a5fa"
-            strokeWidth="4"
-            fill="none"
-            strokeDasharray="10,5"
-            className="animate-pulse"
-            opacity="0.7"
-          />
-        </svg>
-      )}
-      
-      {/* Enhanced Station Markers */}
-      {clusteredStations.map((cluster, index) => {
-        const randX = 30 + Math.random() * 40;
-        const randY = 30 + Math.random() * 40;
-        const station = cluster.stations[0];
-        
-        return (
-          <div key={index}>
-            <div 
-              className="absolute group cursor-pointer transform transition-transform hover:scale-110"
-              style={{ left: `${randX}%`, top: `${randY}%` }}
-              onClick={() => handleStationClick(station)}
-            >
-              {cluster.count > 1 ? (
-                <div className="relative">
-                  <div className={`h-8 w-8 rounded-full ${getStatusColor(station.status)} flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
-                    {cluster.count}
-                  </div>
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-river-blue-light rounded-full animate-ping"></div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-center">
-                  <MarkerIcon status={station.status} isActive={selectedStation?.id === station.id} />
-                </div>
-              )}
-              
-              {/* Enhanced Tooltip */}
-              <div className="invisible group-hover:visible absolute z-10 -top-16 left-1/2 -translate-x-1/2 p-2 bg-background/95 rounded border border-secondary/50 whitespace-nowrap shadow-lg">
-                <div className="text-xs font-medium">{station.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  Status: {station.status} | pH: {station.data?.pH.toFixed(1)}
-                </div>
-                {isConnected && sensorData.length > 0 && (
-                  <div className="text-xs text-river-success">● Live</div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-      
-      {/* InfoWindow */}
-      {selectedStation && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30">
-          <MapInfoWindow 
-            station={selectedStation} 
-            onClose={() => setSelectedStation(null)}
-          />
-        </div>
-      )}
-      
-      {/* Grid overlay for aesthetics */}
-      <div className="absolute inset-0 grid grid-cols-20 grid-rows-20">
-        {Array.from({ length: 400 }).map((_, i) => (
-          <div key={i} className="border-[0.5px] border-river-blue/5"></div>
-        ))}
-      </div>
     </div>
   );
 };
 
-// Real Google Maps implementation (commented out for now)
+// Mapbox River Map View
 const RiverMapView: React.FC = () => {
-  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
-  
-  // This function would integrate the actual Google Maps API
-  const loadGoogleMaps = () => {
-    // Uncomment this code and replace YOUR_API_KEY when ready to use actual Google Maps
-    /*
-    if (!document.getElementById('google-maps-script')) {
-      const script = document.createElement('script');
-      script.id = 'google-maps-script';
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places,visualization&callback=initMap`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setGoogleMapsLoaded(true);
-      document.head.appendChild(script);
-    } else if (window.google && window.google.maps) {
-      setGoogleMapsLoaded(true);
-    }
-    */
-    
-    // For development, we'll just use our enhanced mock
-    setGoogleMapsLoaded(true);
-  };
-  
-  useEffect(() => {
-    loadGoogleMaps();
-  }, []);
-  
-  // For now, return the enhanced mock implementation
-  return <MockGoogleMap />;
+  return <MapboxMap />;
 };
 
 export default RiverMapView;
