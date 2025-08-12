@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { useMapWebSocket } from '@/hooks/useMapWebSocket';
+import RiverMapView from '@/components/maps/RiverMapView';
 
 // Mock device data for the map
 const devices = [
@@ -149,27 +150,8 @@ const MapView: React.FC = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0 rounded-b-lg overflow-hidden">
-              <div className="relative h-[500px] bg-secondary/50 flex items-center justify-center">
-                {/* Map placeholder - in a real app, this would be a Leaflet or Mapbox component */}
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 mb-2 text-muted-foreground" />
-                  <p className="text-muted-foreground">Interactive map would be displayed here</p>
-                  <p className="text-xs text-muted-foreground mt-2">Map view would show all device locations with status indicators</p>
-                  <div className="flex justify-center gap-6 mt-4">
-                    {devices.map((device) => (
-                      <Button 
-                        key={device.id} 
-                        variant="outline"
-                        size="sm"
-                        className={`${selectedDevice?.id === device.id ? 'bg-secondary' : ''}`}
-                        onClick={() => handleDeviceClick(device)}
-                      >
-                        <MapPin className={`h-4 w-4 mr-2 ${device.status === 'online' ? 'text-river-success' : 'text-river-danger'}`} />
-                        {device.id}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+              <div className="relative h-[500px]">
+                <RiverMapView />
               </div>
             </CardContent>
           </Card>

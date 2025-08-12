@@ -114,7 +114,7 @@ const MapboxMap = () => {
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZG9uZnJhcyIsImEiOiJjbWU4ZXozZG4wZmR5MmpzaHM2dWlsNTVsIn0.CiZaQV8p-Rmm8bpWJ39TsA';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZG9uZnJhcyIsImEiOiJjbWU3cnkydHcwMDh5MmlzNTZmaGNvOXFkIn0.ZmQ9ZJ4Bbl5ipjPx2vTVwg';
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
