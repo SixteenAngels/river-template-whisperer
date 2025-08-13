@@ -3,8 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Navigation, Zap } from 'lucide-react';
 import { useDjangoWebSocket } from '@/hooks/useDjangoWebSocket';
 import { riverPathCoordinates } from './RiverPath';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { Loader } from '@googlemaps/js-api-loader';
 
 // Enhanced monitoring stations with custom descriptive names
 const stations = [
@@ -75,11 +74,13 @@ const stations = [
   },
 ];
 
-// Mapbox implementation with enhanced features
-const MapboxMap = () => {
+// Google Maps implementation with enhanced features
+const GoogleMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const map = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const riverPath = useRef<google.maps.Polyline | null>(null);
+  const infoWindows = useRef<google.maps.InfoWindow[]>([]);
   const { sensorData, isConnected } = useDjangoWebSocket();
   const [showRiverPath, setShowRiverPath] = useState(true);
   const [realTimeStations, setRealTimeStations] = useState(stations);
@@ -110,35 +111,35 @@ const MapboxMap = () => {
     }
   }, [sensorData]);
 
-  // Initialize Mapbox
+  // Initialize Google Maps
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZG9uZnJhcyIsImEiOiJjbWU3cnkydHcwMDh5MmlzNTZmaGNvOXFkIn0.ZmQ9ZJ4Bbl5ipjPx2vTVwg';
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center: [-74.006, 40.7128], // NYC coordinates
-      zoom: 12,
-      pitch: 45,
-      bearing: -17.6,
+    const loader = new Loader({
+      apiKey: 'AIzaSyC4slId_coCqTJDDDRyhjkDgHtIlOWNojU',
+      version: 'weekly',
+      libraries: ['places']
     });
 
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-left'
-    );
+    loader.load().then(() => {
+      map.current = new google.maps.Map(mapContainer.current!, {
+        center: { lat: 40.7128, lng: -74.006 }, // NYC coordinates
+        zoom: 12,
+        mapTypeId: google.maps.MapTypeId.HYBRID,
+        tilt: 45,
+        heading: 17.6,
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: true,
+        zoomControl: true,
+      });
+    });
 
     // Cleanup on unmount
     return () => {
-      if (map.current) {
-        markersRef.current.forEach(marker => marker.remove());
-        map.current.remove();
-      }
+      markersRef.current.forEach(marker => marker.setMap(null));
+      infoWindows.current.forEach(infoWindow => infoWindow.close());
+      if (riverPath.current) riverPath.current.setMap(null);
     };
   }, []);
 
@@ -146,50 +147,36 @@ const MapboxMap = () => {
   useEffect(() => {
     if (!map.current) return;
 
-    map.current.on('load', () => {
-      if (showRiverPath) {
-        if (map.current?.getSource('river-path')) {
-          map.current.removeLayer('river-path');
-          map.current.removeSource('river-path');
-        }
-
-        map.current?.addSource('river-path', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: riverPathCoordinates.map(coord => [coord.lng, coord.lat])
-            }
-          }
-        });
-
-        map.current?.addLayer({
-          id: 'river-path',
-          type: 'line',
-          source: 'river-path',
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
-          paint: {
-            'line-color': '#60a5fa',
-            'line-width': 4,
-            'line-opacity': 0.8
-          }
-        });
+    if (showRiverPath) {
+      if (riverPath.current) {
+        riverPath.current.setMap(null);
       }
-    });
-  }, [showRiverPath]);
+
+      riverPath.current = new google.maps.Polyline({
+        path: riverPathCoordinates.map(coord => ({ lat: coord.lat, lng: coord.lng })),
+        geodesic: true,
+        strokeColor: '#60a5fa',
+        strokeOpacity: 0.8,
+        strokeWeight: 4,
+      });
+
+      riverPath.current.setMap(map.current);
+    } else {
+      if (riverPath.current) {
+        riverPath.current.setMap(null);
+      }
+    }
+  }, [showRiverPath, map.current]);
 
   // Update markers
   useEffect(() => {
     if (!map.current) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
+    // Clear existing markers and info windows
+    markersRef.current.forEach(marker => marker.setMap(null));
+    infoWindows.current.forEach(infoWindow => infoWindow.close());
     markersRef.current = [];
+    infoWindows.current = [];
 
     // Add new markers
     realTimeStations.forEach((station) => {
@@ -202,54 +189,54 @@ const MapboxMap = () => {
         }
       };
 
-      // Create marker element
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.style.cssText = `
-        background: ${getStatusColor(station.status)};
-        width: 20px;
-        height: 20px;
-        border: 3px solid white;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        transition: transform 0.2s;
-      `;
+      // Create custom marker icon
+      const markerIcon = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: getStatusColor(station.status),
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+      };
 
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)';
-      });
-
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-      });
-
-      // Create popup
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: true,
-        closeOnClick: true
-      }).setHTML(`
-        <div class="p-3">
-          <h3 class="font-semibold text-sm mb-2">${station.name}</h3>
-          <div class="space-y-1 text-xs">
-            <div>Status: <span class="font-medium">${station.status}</span></div>
-            <div>pH: <span class="font-medium">${station.data?.pH.toFixed(1)}</span></div>
-            <div>Temperature: <span class="font-medium">${station.data?.temperature.toFixed(1)}°C</span></div>
-            <div>Turbidity: <span class="font-medium">${station.data?.turbidity.toFixed(1)} NTU</span></div>
-            <div>Dissolved O₂: <span class="font-medium">${station.data?.dissolvedOxygen.toFixed(1)} mg/L</span></div>
-            ${isConnected && sensorData.length > 0 ? '<div class="text-green-600 font-medium">● Live Data</div>' : ''}
+      // Create info window content
+      const infoWindowContent = `
+        <div style="padding: 12px; font-family: system-ui; max-width: 250px;">
+          <h3 style="font-weight: 600; font-size: 14px; margin: 0 0 8px 0;">${station.name}</h3>
+          <div style="font-size: 12px; line-height: 1.4;">
+            <div style="margin-bottom: 4px;">Status: <strong>${station.status}</strong></div>
+            <div style="margin-bottom: 4px;">pH: <strong>${station.data?.pH.toFixed(1)}</strong></div>
+            <div style="margin-bottom: 4px;">Temperature: <strong>${station.data?.temperature.toFixed(1)}°C</strong></div>
+            <div style="margin-bottom: 4px;">Turbidity: <strong>${station.data?.turbidity.toFixed(1)} NTU</strong></div>
+            <div style="margin-bottom: 4px;">Dissolved O₂: <strong>${station.data?.dissolvedOxygen.toFixed(1)} mg/L</strong></div>
+            ${isConnected && sensorData.length > 0 ? '<div style="color: #10b981; font-weight: 500;">● Live Data</div>' : ''}
           </div>
         </div>
-      `);
+      `;
 
       // Create marker
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([station.position.lng, station.position.lat])
-        .setPopup(popup)
-        .addTo(map.current!);
+      const marker = new google.maps.Marker({
+        position: { lat: station.position.lat, lng: station.position.lng },
+        map: map.current,
+        icon: markerIcon,
+        title: station.name,
+        animation: google.maps.Animation.DROP,
+      });
+
+      // Create info window
+      const infoWindow = new google.maps.InfoWindow({
+        content: infoWindowContent,
+      });
+
+      // Add click listener
+      marker.addListener('click', () => {
+        // Close all other info windows
+        infoWindows.current.forEach(iw => iw.close());
+        infoWindow.open(map.current, marker);
+      });
 
       markersRef.current.push(marker);
+      infoWindows.current.push(infoWindow);
     });
   }, [realTimeStations, isConnected, sensorData]);
 
@@ -287,9 +274,9 @@ const MapboxMap = () => {
   );
 };
 
-// Mapbox River Map View
+// Google Maps River Map View
 const RiverMapView: React.FC = () => {
-  return <MapboxMap />;
+  return <GoogleMap />;
 };
 
 export default RiverMapView;
