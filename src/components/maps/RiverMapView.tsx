@@ -5,16 +5,16 @@ import { useDjangoWebSocket } from '@/hooks/useDjangoWebSocket';
 import { riverPathCoordinates } from './RiverPath';
 import { Loader } from '@googlemaps/js-api-loader';
 
-// Enhanced monitoring stations with custom descriptive names
+// KNUST Library area monitoring stations
 const stations = [
   { 
     id: 1, 
-    name: 'Brooklyn Bridge Water Monitor', 
-    position: { lat: 40.712776, lng: -74.005974 }, 
+    name: 'KNUST Library Main Entrance', 
+    position: { lat: 6.6745, lng: -1.5716 }, 
     status: 'normal' as const,
     data: {
       pH: 7.2,
-      temperature: 18.5,
+      temperature: 28.5,
       turbidity: 2.1,
       dissolvedOxygen: 8.5,
       lastUpdate: new Date().toISOString()
@@ -22,12 +22,12 @@ const stations = [
   },
   { 
     id: 2, 
-    name: 'Manhattan Financial District Sensor', 
-    position: { lat: 40.730610, lng: -73.985242 }, 
+    name: 'Central Administration Block', 
+    position: { lat: 6.6758, lng: -1.5720 }, 
     status: 'normal' as const,
     data: {
       pH: 7.0,
-      temperature: 19.2,
+      temperature: 29.2,
       turbidity: 1.8,
       dissolvedOxygen: 8.8,
       lastUpdate: new Date().toISOString()
@@ -35,12 +35,12 @@ const stations = [
   },
   { 
     id: 3, 
-    name: 'Central Park South Quality Station', 
-    position: { lat: 40.758896, lng: -73.985130 }, 
+    name: 'Engineering Block Water Quality', 
+    position: { lat: 6.6730, lng: -1.5700 }, 
     status: 'warning' as const,
     data: {
       pH: 6.5,
-      temperature: 22.1,
+      temperature: 32.1,
       turbidity: 4.2,
       dissolvedOxygen: 6.2,
       lastUpdate: new Date().toISOString()
@@ -48,12 +48,12 @@ const stations = [
   },
   { 
     id: 4, 
-    name: 'Times Square Environmental Monitor', 
-    position: { lat: 40.748817, lng: -73.985428 }, 
+    name: 'Student Residence Area', 
+    position: { lat: 6.6765, lng: -1.5735 }, 
     status: 'normal' as const,
     data: {
       pH: 7.1,
-      temperature: 18.8,
+      temperature: 28.8,
       turbidity: 2.0,
       dissolvedOxygen: 8.2,
       lastUpdate: new Date().toISOString()
@@ -61,12 +61,12 @@ const stations = [
   },
   { 
     id: 5, 
-    name: 'Hudson River Industrial Sensor', 
-    position: { lat: 40.712811, lng: -74.013083 }, 
+    name: 'Sports Complex Water Monitor', 
+    position: { lat: 6.6720, lng: -1.5680 }, 
     status: 'danger' as const,
     data: {
       pH: 5.8,
-      temperature: 25.3,
+      temperature: 35.3,
       turbidity: 8.5,
       dissolvedOxygen: 4.1,
       lastUpdate: new Date().toISOString()
@@ -123,8 +123,8 @@ const GoogleMap = () => {
 
     loader.load().then(() => {
       map.current = new google.maps.Map(mapContainer.current!, {
-        center: { lat: 40.7128, lng: -74.006 }, // NYC coordinates
-        zoom: 12,
+        center: { lat: 6.6745, lng: -1.5716 }, // KNUST coordinates
+        zoom: 16,
         mapTypeId: google.maps.MapTypeId.HYBRID,
         tilt: 45,
         heading: 17.6,
